@@ -2,17 +2,18 @@ import { useState } from "react"
 import Todo from "../Todo/Todo";
 import AddTodo from "../AddTodo/AddTodo";
 import styles from './TodoList.module.css';
+import { useEffect } from "react";
 
 
 export default function TodoClone({filter}) {
-  const [todos, setTodos] = useState([
-    {id: '1', text: '장보기', status: 'active'},
-    {id: '2', text: '산책', status: 'active'}
-  ]);
+  const [todos, setTodos] = useState(() => readTodosFromLocalStroage());
 
   const handleAdd = (todo) => {setTodos([...todos, todo])}
   const handleUpdate = (updated) => {setTodos(todos.map(t => t.id === updated.id ? updated : t))}
   const handleDelete = (deleted) => {setTodos(todos.filter(t => t.id !== deleted.id))}
+  useEffect(() => {
+    window.localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
   const filtered = getFilteredItems(todos, filter);
 
   return (
@@ -30,6 +31,11 @@ export default function TodoClone({filter}) {
       <AddTodo onAdd={handleAdd}/>
     </section>
   )
+}
+
+function readTodosFromLocalStroage() {
+  const todos = localStorage.getItem('todos');
+  return todos ? JSON.parse(todos) : []; 
 }
 
 function getFilteredItems(todos, filter) {
